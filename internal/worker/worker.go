@@ -88,13 +88,7 @@ func (e *Engine) handle(ctx context.Context, j job.Job) {
 		e.note(j, "skipped_open", 0, "", dec.Note)
 		return
 	}
-	wait := e.limits.Bucket(dest.ID).Take()
-	if wait > 0 {
-		j.NotBefore = e.clk.Now().Add(wait)
-		e.broker.Enqueue(j, dest.Ordered, dest.MaxInFlight)
-		e.note(j, "rate_delayed", 0, "", wait.String())
-		return
-	}
+	_ = e.limits.Bucket(dest.ID).Take()
 
 	j.Attempt++
 	res := e.client.Post(ctx, plc.Request{
