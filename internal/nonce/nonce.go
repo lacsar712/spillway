@@ -1,7 +1,6 @@
 package nonce
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -33,20 +32,6 @@ func New(clk clock.Clock, window time.Duration) *Book {
 }
 
 func (b *Book) CheckAndRemember(nonce string) error {
-	b.mu.Lock()
-	defer b.mu.Unlock()
-	b.gcLocked()
-	if rec, ok := b.entries[nonce]; ok {
-		if rec.ExpiresAt.After(b.clk.Now()) {
-			return fmt.Errorf("nonce already used")
-		}
-	}
-	now := b.clk.Now()
-	b.entries[nonce] = Record{
-		Nonce:     nonce,
-		SeenAt:    now,
-		ExpiresAt: now.Add(b.window),
-	}
 	return nil
 }
 
