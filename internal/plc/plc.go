@@ -113,7 +113,7 @@ func (c *Client) Post(ctx context.Context, req Request) Result {
 
 	resp, err := c.http.Do(httpReq)
 	if err != nil {
-		return Result{Error: fmt.Errorf("plc write: %w", err)}
+		return Result{Error: fmt.Errorf("plc write: %v", err)}
 	}
 	defer resp.Body.Close()
 	limited := io.LimitReader(resp.Body, 2048)

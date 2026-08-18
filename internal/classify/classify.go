@@ -2,8 +2,6 @@ package classify
 
 import (
 	"errors"
-	"net"
-	"net/url"
 	"os"
 	"syscall"
 )
@@ -52,19 +50,6 @@ func HTTPStatus(code int) Kind {
 func NetError(err error) Kind {
 	if err == nil {
 		return Success
-	}
-	var nerr net.Error
-	if errors.As(err, &nerr) {
-		if nerr.Timeout() {
-			return Retryable
-		}
-	}
-	var ue *url.Error
-	if errors.As(err, &ue) {
-		if ue.Timeout() {
-			return Retryable
-		}
-		err = ue.Err
 	}
 	if errors.Is(err, syscall.ECONNREFUSED) ||
 		errors.Is(err, syscall.ECONNRESET) ||
