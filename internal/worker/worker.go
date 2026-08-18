@@ -116,6 +116,7 @@ func (e *Engine) handle(ctx context.Context, j job.Job) {
 
 	switch kind {
 	case classify.Success:
+		br.Success()
 		return
 	case classify.Retryable:
 		br.Failure()
