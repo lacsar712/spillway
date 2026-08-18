@@ -76,6 +76,9 @@ func (p *Pipeline) Handle(h http.Header, body []byte) (Result, int, error) {
 			return Result{}, http.StatusConflict, err
 		}
 	}
+	if err := p.Nonces.CheckAndRemember(in.Nonce); err != nil {
+		return Result{}, http.StatusConflict, err
+	}
 	now := p.Clk.Now()
 	eventID := idgen.New("cmd", now)
 	bodyHash := hashutil.SHA256Hex(body)
