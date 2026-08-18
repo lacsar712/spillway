@@ -1,0 +1,7 @@
+/data/
+*.exe
+*.test
+*.out
+.idea/
+.vscode/
+*.log

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Spillway gate command relay</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header>
+    <h1>Spillway</h1>
+    <p class="sub">signed gate-move commands · reservoir interlock · PLC write with retry / circuit / DLQ</p>
+    <div id="status" class="status">connecting…</div>
+  </header>
+  <main>
+    <section>
+      <h2>Reservoir</h2>
+      <div id="reservoir" class="muted">loading…</div>
+    </section>
+    <section>
+      <h2>PLC endpoints</h2>
+      <form id="plc-form">
+        <input name="name" placeholder="name" required />
+        <input name="url" placeholder="http://plc/write" required />
+        <input name="secret" placeholder="outbound secret" required minlength="8" />
+        <input name="type_prefixes" placeholder="prefixes, e.g. gate." />
+        <button type="submit">Add PLC</button>
+      </form>
+      <div id="plcs"></div>
+    </section>
+    <section>
+      <h2>Issue gate command</h2>
+      <p class="hint">HMAC-SHA256 with ops secret <code>dev-ops-secret</code>. Interlock checks reservoir level before queueing a PLC write.</p>
+      <form id="cmd-form">
+        <input name="type" value="gate.raise" required />
+        <textarea name="payload" rows="6">{ "bay": "S1", "opening_m": 1.5, "reason": "flood-route" }</textarea>
+        <button type="submit">Send</button>
+      </form>
+      <pre id="cmd-result"></pre>
+    </section>
+    <section>
+      <h2>Journal</h2>
+      <button type="button" id="refresh">Refresh</button>
+      <div id="journal"></div>
+    </section>
+    <section>
+      <h2>Dead letter</h2>
+      <div id="dlq"></div>
+    </section>
+    <section>
+      <h2>PLC loopback received</h2>
+      <div id="loop"></div>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
