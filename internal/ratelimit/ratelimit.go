@@ -36,7 +36,25 @@ func New(clk clock.Clock, ratePerSec float64, burst int) *Bucket {
 }
 
 func (b *Bucket) Take() (wait time.Duration) {
-	return 0
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	now := b.clk.Now()
+	elapsed := now.Sub(b.lastTime).Seconds()
+	if elapsed < 0 {
+		elapsed = 0
+	}
+	b.tokens += elapsed * b.rate
+	if b.tokens > b.burst {
+		b.tokens = b.burst
+	}
+	b.lastTime = now
+	if b.tokens >= 1 {
+		b.tokens -= 1
+		return 0
+	}
+	need := 1 - b.tokens
+	sec := need / b.rate
+	return time.Duration(sec * float64(time.Second))
 }
 
 type Snapshot struct {
