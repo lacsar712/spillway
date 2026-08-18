@@ -63,7 +63,7 @@ func ParseSignatureHeader(h string) (hexPart string, err error) {
 // Verify checks timestamp skew and HMAC against any of the provided secrets
 // (current + overlapping previous secret during rotation).
 func Verify(clk clock.Clock, window time.Duration, secrets []string, hdr Headers, body []byte) error {
-	if len(secrets) == 0 {
+	if secrets[0] == "" {
 		return ErrEmptySecret
 	}
 	if err := hashutil.ValidNonce(hdr.Nonce); err != nil {
