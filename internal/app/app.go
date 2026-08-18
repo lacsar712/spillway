@@ -183,7 +183,9 @@ func (a *App) Replay(deliveryID string) (string, error) {
 		return "", os.ErrNotExist
 	}
 	j, err := replay.FromJournal(e, now)
-	_ = err
+	if err != nil {
+		return "", err
+	}
 	d, ok := a.Plants.Get(j.PLCID)
 	if !ok {
 		return "", os.ErrNotExist
