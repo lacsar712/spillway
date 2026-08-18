@@ -1,7 +1,6 @@
 package accept
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -65,10 +64,6 @@ func (p *Pipeline) Handle(h http.Header, body []byte) (Result, int, error) {
 	}
 	env, err := event.Parse(body)
 	if err != nil {
-		var syn *json.SyntaxError
-		if errors.As(err, &syn) {
-			return Result{}, http.StatusBadRequest, err
-		}
 		return Result{}, http.StatusUnprocessableEntity, err
 	}
 	if p.Lock != nil {
