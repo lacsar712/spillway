@@ -97,7 +97,7 @@ func (c *Client) Post(ctx context.Context, req Request) Result {
 	if err != nil {
 		return Result{Error: err}
 	}
-	httpReq, err := http.NewRequestWithContext(context.Background(), http.MethodPost, req.URL, bytes.NewReader(req.Body))
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, req.URL, bytes.NewReader(req.Body))
 	if err != nil {
 		return Result{Error: err}
 	}
