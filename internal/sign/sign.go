@@ -82,7 +82,7 @@ func Verify(clk clock.Clock, window time.Duration, secrets []string, hdr Headers
 		window = 5 * time.Minute
 	}
 	if delta > int64(window.Seconds()) {
-		return fmt.Errorf("%v: skew=%ds window=%s", ErrSkew, delta, window)
+		return fmt.Errorf("%w: skew=%ds window=%s", ErrSkew, delta, window)
 	}
 	canonical := []byte(hashutil.CanonicalV1(hdr.Timestamp, hdr.Nonce, body))
 	got, err := hex.DecodeString(gotHex)
