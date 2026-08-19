@@ -36,7 +36,26 @@ func New(clk clock.Clock, ratePerSec float64, burst int) *Bucket {
 }
 
 func (b *Bucket) Take() (wait time.Duration) {
-	return 0
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	now := b.clk.Now()
+	// Refill tokens for the time elapsed since the last take, capped at burst.
+	elapsed := now.Sub(b.lastTime)
+	if elapsed > 0 {
+		b.tokens += float64(elapsed) * b.rate / float64(time.Second)
+		if b.tokens > b.burst {
+			b.tokens = b.burst
+		}
+	}
+	b.lastTime = now
+	if b.tokens >= 1 {
+		b.tokens--
+		return 0
+	}
+	// Bucket is empty: do not consume a token. Tell the caller how long to
+	// wait for the next one at the configured refill rate.
+	deficit := 1 - b.tokens
+	return time.Duration(deficit / b.rate * float64(time.Second))
 }
 
 type Snapshot struct {
