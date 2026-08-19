@@ -23,7 +23,7 @@ func Parse(body []byte) (Envelope, error) {
 	}
 	var env Envelope
 	if err := json.Unmarshal(body, &env); err != nil {
-		return Envelope{}, fmt.Errorf("json: %v", err)
+		return Envelope{}, fmt.Errorf("json: %w", err)
 	}
 	if err := ValidateType(env.Type); err != nil {
 		return Envelope{}, err
