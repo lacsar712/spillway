@@ -84,7 +84,7 @@ func (p *Pipeline) Handle(h http.Header, body []byte) (Result, int, error) {
 	bodyHash := hashutil.SHA256Hex(body)
 	existing, replay, err := p.Idem.Remember(in.IdemKey, bodyHash, eventID)
 	if err != nil {
-		if err == idempotency.ErrConflict {
+		if errors.Is(err, idempotency.ErrConflict) {
 			return Result{}, http.StatusConflict, err
 		}
 		return Result{}, http.StatusBadRequest, err
