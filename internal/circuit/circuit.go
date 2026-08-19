@@ -96,6 +96,22 @@ func (b *Breaker) Allow() Decision {
 }
 
 func (b *Breaker) Success() {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	// A successful delivery clears accumulated failures so a later,
+	// isolated failure does not trip the breaker on top of stale state.
+	b.failures = 0
+	switch b.state {
+	case HalfOpen:
+		// A probe succeeded: close the breaker and clear the probe budget.
+		b.state = Closed
+		b.probesLeft = 0
+	case Open:
+		// Stay open until the cooldown elapses; a stray success (e.g. a
+		// racing probe) must not short-circuit the cooldown into Closed.
+	case Closed:
+		// failures already cleared above.
+	}
 }
 
 func (b *Breaker) Failure() {
