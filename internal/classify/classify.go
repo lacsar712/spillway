@@ -47,9 +47,21 @@ func HTTPStatus(code int) Kind {
 	return Terminal
 }
 
+// timeoutError is the minimal contract that net.Error, context.DeadlineExceeded,
+// and *url.Error all satisfy. Matching on this interface (rather than a fixed
+// sentinel) lets a wrapped timeout survive any number of fmt.Errorf("%w", ...)
+// layers and still be recognised as retryable.
+type timeoutError interface {
+	Timeout() bool
+}
+
 func NetError(err error) Kind {
 	if err == nil {
 		return Success
+	}
+	var terr timeoutError
+	if errors.As(err, &terr) && terr.Timeout() {
+		return Retryable
 	}
 	if errors.Is(err, syscall.ECONNREFUSED) ||
 		errors.Is(err, syscall.ECONNRESET) ||
