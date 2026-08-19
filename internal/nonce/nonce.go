@@ -1,11 +1,16 @@
 package nonce
 
 import (
+	"errors"
+	"fmt"
 	"sync"
 	"time"
 
 	"github.com/lacsar712/spillway/internal/clock"
 )
+
+// ErrReuse signals a nonce that was already accepted within the replay window.
+var ErrReuse = errors.New("nonce reused within replay window")
 
 type Record struct {
 	Nonce     string    `json:"nonce"`
@@ -31,7 +36,21 @@ func New(clk clock.Clock, window time.Duration) *Book {
 	}
 }
 
+// CheckAndRemember records a nonce the first time it is seen and rejects any
+// reuse while the entry is still live. A live duplicate yields ErrReuse.
 func (b *Book) CheckAndRemember(nonce string) error {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	b.gcLocked()
+	now := b.clk.Now()
+	if rec, ok := b.entries[nonce]; ok && rec.ExpiresAt.After(now) {
+		return fmt.Errorf("%w: nonce=%s", ErrReuse, nonce)
+	}
+	b.entries[nonce] = Record{
+		Nonce:     nonce,
+		SeenAt:    now,
+		ExpiresAt: now.Add(b.window),
+	}
 	return nil
 }
 

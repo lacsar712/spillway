@@ -63,6 +63,9 @@ func (p *Pipeline) Handle(h http.Header, body []byte) (Result, int, error) {
 		}
 		return Result{}, http.StatusUnauthorized, err
 	}
+	if err := p.Nonces.CheckAndRemember(in.Nonce); err != nil {
+		return Result{}, http.StatusConflict, err
+	}
 	env, err := event.Parse(body)
 	if err != nil {
 		var syn *json.SyntaxError
